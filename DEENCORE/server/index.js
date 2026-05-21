@@ -35,7 +35,7 @@ app.use(express.json());
 // ============================================================
 const QF_CLIENT_ID = process.env.QF_CLIENT_ID;
 const QF_CLIENT_SECRET = process.env.QF_CLIENT_SECRET;
-const QF_AUTH_URL = process.env.QF_AUTH_URL || 'https://auth.quran.foundation';
+const QF_AUTH_URL = process.env.QF_AUTH_URL || 'https://oauth2.quran.foundation';
 const QF_API_BASE = process.env.QF_API_BASE || 'https://apis.quran.foundation';
 const QF_ACCESS_TOKEN = process.env.QF_ACCESS_TOKEN;
 const PORT = process.env.PORT || 3001;

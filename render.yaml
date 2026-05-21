@@ -18,7 +18,7 @@ services:
       - key: NODE_VERSION
         value: "20"
       - key: QF_AUTH_URL
-        value: https://auth.quran.foundation
+        value: https://oauth2.quran.foundation
       - key: QF_API_BASE
         value: https://apis.quran.foundation
       - key: CORS_ORIGIN
