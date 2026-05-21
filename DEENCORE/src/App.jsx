@@ -260,7 +260,7 @@ const defaultSettings = {
   viewMode: 'card',
   spacing: 'normal',
   layoutMode: 'wide',
-  translationId: 84,
+  translationId: 85,
   customAccent: '',
 };
 
@@ -457,9 +457,9 @@ function SettingsProvider({ children }) {
 
   useEffect(() => {
     try {
-      const migrationKey = 'translationDefaultMigrated_84';
+      const migrationKey = 'translationDefaultMigrated_85_v2';
       if (localStorage.getItem(migrationKey)) return;
-      setSettings(prev => prev.translationId === 85 ? { ...prev, translationId: 84 } : prev);
+      setSettings(prev => prev.translationId === 84 ? { ...prev, translationId: 85 } : prev);
       localStorage.setItem(migrationKey, '1');
     } catch {}
   }, []);

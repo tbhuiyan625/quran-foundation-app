@@ -779,8 +779,11 @@ app.get('/api/chapters/:chapterNumber/verses', checkCredentials, async (req, res
 // ============================================================
 // AVAILABLE TRANSLATIONS - Only IDs confirmed working in this API tier
 // ============================================================
+// NOTE on translation 84 (Mufti Taqi Usmani): the Quran Foundation
+// pre-live tier returns empty translation data for this resource id,
+// so verses come back with "Translation not available". It is omitted
+// from the dropdown until production credentials are wired up.
 const AVAILABLE_TRANSLATIONS = [
-  { id: 84,  name: 'Mufti Taqi Usmani (English)', language: 'English', description: 'Mufti Taqi Usmani English translation with Indo Pak script preference' },
   { id: 85,  name: 'M.A.S. Abdel Haleem', language: 'English', description: 'Modern English translation' },
   { id: 57,  name: 'Transliteration',      language: 'English', description: 'Latin-script transliteration' },
   { id: 234, name: 'Fatah Muhammad Jalandhari', language: 'Urdu', description: 'Urdu translation' },
@@ -798,7 +801,7 @@ const AVAILABLE_TRANSLATIONS = [
 app.get('/api/translations', (req, res) => {
   res.json({
     translations: AVAILABLE_TRANSLATIONS,
-    default: 84
+    default: 85
   });
 });
 
