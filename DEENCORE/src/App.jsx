@@ -4,7 +4,14 @@ import "./App.css";
 import deenCoreIcon from "./assets/logo-icon.svg";
 
 // ─── API Base URL ──────────────────────────────────────────
-const API_BASE = import.meta.env.VITE_API_BASE || `${window.location.protocol}//${window.location.hostname}:3001`;
+// Production (Vercel + Render split): set VITE_API_URL to the Render backend URL.
+// Same-origin deploy: leave VITE_API_URL empty; backend serves dist/ on the same host.
+// Dev: Vite on :5173 talks to Express on :3001 automatically.
+const RAW_API_BASE =
+  import.meta.env.VITE_API_URL ??
+  import.meta.env.VITE_API_BASE ??
+  (import.meta.env.DEV ? `${window.location.protocol}//${window.location.hostname}:3001` : '');
+const API_BASE = (RAW_API_BASE || '').replace(/\/+$/, '');
 
 // ═══════════════════════════════════════════════════════════
 // MOCK AUTH DATABASE (simulated — stored in localStorage)

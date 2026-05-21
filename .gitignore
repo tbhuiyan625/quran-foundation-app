@@ -1,0 +1,16 @@
+# Repo-root ignores. Per-folder ignores live in DEENCORE/.gitignore.
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Stale empty server/ folder at repo root — real backend lives at DEENCORE/server.
+/server/node_modules/
+
+# Stale dist/ at repo root — Vite build output lives at DEENCORE/dist.
+/dist/
+
+# Editor / agent metadata
+.cursor/

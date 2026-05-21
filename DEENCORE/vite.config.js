@@ -2,7 +2,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: '/quran-foundation-app/',
+  // BASE_PATH override: GitHub Pages needs '/<repo-name>/', Vercel/Render serve from '/'.
+  // Set VITE_BASE_PATH=/quran-foundation-app/ only when targeting GitHub Pages.
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [
     react({
       // Faster refresh on changes

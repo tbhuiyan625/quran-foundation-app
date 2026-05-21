@@ -12,7 +12,22 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-app.use(cors());
+
+// CORS: comma-separated allowlist via CORS_ORIGIN env (e.g.
+// "https://deencore.vercel.app,https://www.deencore.com"). Unset or "*" allows all origins.
+const corsOriginEnv = (process.env.CORS_ORIGIN || '').trim();
+const corsAllowList = corsOriginEnv && corsOriginEnv !== '*'
+  ? corsOriginEnv.split(',').map(s => s.trim()).filter(Boolean)
+  : null;
+app.use(cors({
+  origin: corsAllowList
+    ? (origin, cb) => {
+        if (!origin) return cb(null, true);
+        return cb(null, corsAllowList.includes(origin));
+      }
+    : true,
+  credentials: false,
+}));
 app.use(express.json());
 
 // ============================================================
@@ -353,16 +368,28 @@ const checkCredentials = (req, res, next) => {
 
 // Health check - shows credential status
 app.get('/api/health', (req, res) => {
-  const hasCredentials = !!(QF_CLIENT_ID && QF_CLIENT_SECRET);
+  const hasCredentials = !!(QF_CLIENT_ID && QF_CLIENT_SECRET) && !isCredentialsPlaceholder();
   const tokenValid = !!(tokenCache.access_token && tokenCache.expires_at > Date.now());
-  
-  res.json({
+
+  res.status(200).json({
     status: 'ok',
+    service: 'deencore-backend',
+    uptime_seconds: Math.round(process.uptime()),
     credentials_configured: hasCredentials,
     access_token_cached: tokenValid,
-    message: hasCredentials 
+    cors_origin: corsAllowList || '*',
+    message: hasCredentials
       ? 'Backend is ready and configured'
-      : 'Credentials not configured - add QF_CLIENT_ID and QF_CLIENT_SECRET to server/.env'
+      : 'Credentials not configured - set QF_CLIENT_ID and QF_CLIENT_SECRET env vars',
+  });
+});
+
+// Lightweight "/" so platform probes hitting root don't see a 404.
+app.get('/', (req, res) => {
+  res.status(200).json({
+    service: 'deencore-backend',
+    status: 'ok',
+    health: '/api/health',
   });
 });
 
@@ -1217,14 +1244,14 @@ const cachedApiRequest = async (endpoint) => {
 // ============================================================
 // START SERVER
 // ============================================================
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   if (QF_CLIENT_ID && QF_CLIENT_SECRET) {
-    console.log(`✅ Backend server running at http://localhost:${PORT}`);
+    console.log(`✅ Backend server running at http://0.0.0.0:${PORT}`);
     console.log(`✅ DEENCORE OAuth2 credentials configured`);
     console.log(`   Using OAuth2 client credentials flow for token management`);
   } else {
-    console.log(`⚠️  Backend server running at http://localhost:${PORT}`);
-    console.log(`❌ DEENCORE credentials NOT found in server/.env`);
+    console.log(`⚠️  Backend server running at http://0.0.0.0:${PORT}`);
+    console.log(`❌ DEENCORE credentials NOT found in environment`);
     console.log(`   Required: QF_CLIENT_ID and QF_CLIENT_SECRET`);
     console.log(`   Get credentials from: https://api-docs.quran.foundation/request-access`);
   }
