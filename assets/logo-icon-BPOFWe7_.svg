@@ -1,0 +1,45 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" fill="none" role="img" aria-label="DeenCore Geometric Crescent Node">
+  <title>DeenCore Geometric Crescent Node</title>
+  <defs>
+    <linearGradient id="dc-crescent-bg" x1="8" y1="6" x2="64" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0A1428"/>
+      <stop offset="0.58" stop-color="#070D1A"/>
+      <stop offset="1" stop-color="#040814"/>
+    </linearGradient>
+    <linearGradient id="dc-crescent-line" x1="20" y1="18" x2="52" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6BC7FF"/>
+      <stop offset="0.5" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#5DB8FF"/>
+    </linearGradient>
+    <radialGradient id="dc-crescent-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(36 36) rotate(90) scale(25)">
+      <stop offset="0" stop-color="#5DB8FF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#5DB8FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="dc-crescent-blur" x="15" y="15" width="42" height="42" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect x="4" y="4" width="64" height="64" rx="18" fill="url(#dc-crescent-bg)"/>
+  <rect x="4.75" y="4.75" width="62.5" height="62.5" rx="17.25" stroke="#5DB8FF" stroke-opacity="0.42" stroke-width="1.5"/>
+  
+  <!-- Glow background -->
+  <circle cx="36" cy="36" r="23.5" fill="url(#dc-crescent-glow)"/>
+  <circle cx="36" cy="36" r="23.5" stroke="#B5E7FF" stroke-opacity="0.38" stroke-width="1"/>
+
+  <!-- Crescent moon shape (flipped) -->
+  <g filter="url(#dc-crescent-blur)">
+    <path
+      d="M 40 18 C 30 18 22 26 22 36 C 22 46 30 54 40 54 C 35 54 25 48 25 36 C 25 24 35 18 40 18 Z"
+      fill="url(#dc-crescent-line)"
+    />
+  </g>
+
+  <!-- Center core accent -->
+  <circle cx="36" cy="36" r="1.2" fill="#5DB8FF" opacity="0.6"/>
+</svg>
