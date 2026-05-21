@@ -1,0 +1,29 @@
+# Render Infrastructure-as-Code for the DeenCore backend.
+# Connect this repo in Render (New → Blueprint) and it pre-fills these settings.
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: deencore-backend
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: DEENCORE/server
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: QF_AUTH_URL
+        value: https://auth.quran.foundation
+      - key: QF_API_BASE
+        value: https://apis.quran.foundation
+      - key: CORS_ORIGIN
+        sync: false
+      - key: QF_CLIENT_ID
+        sync: false
+      - key: QF_CLIENT_SECRET
+        sync: false
