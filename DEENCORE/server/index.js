@@ -1217,7 +1217,11 @@ app.get('/api/search', checkCredentials, async (req, res) => {
         'x-client-id': QF_CLIENT_ID,
       },
     });
-    if (!resp.ok) throw new Error(`Quran search API returned ${resp.status}`);
+    if (!resp.ok) {
+      const body = await resp.text();
+      console.log(`  ✗ Search upstream ${resp.status}: ${body.substring(0, 300)}`);
+      throw new Error(`Quran search API returned ${resp.status}: ${body.substring(0, 200)}`);
+    }
     const data = await resp.json();
     res.json(data);
   } catch (err) {
