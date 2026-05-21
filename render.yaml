@@ -17,10 +17,13 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "20"
+      # Pre-live by default (most hackathon credentials are issued here).
+      # For production credentials, change to https://oauth2.quran.foundation
+      # and https://apis.quran.foundation.
       - key: QF_AUTH_URL
-        value: https://oauth2.quran.foundation
+        value: https://prelive-oauth2.quran.foundation
       - key: QF_API_BASE
-        value: https://apis.quran.foundation
+        value: https://apis-prelive.quran.foundation
       - key: CORS_ORIGIN
         sync: false
       - key: QF_CLIENT_ID

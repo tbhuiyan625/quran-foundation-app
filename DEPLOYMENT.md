@@ -66,8 +66,8 @@ Render reads `render.yaml` automatically. The blueprint declares:
 | ------------------ | -------- | ---------------------------------------------------- |
 | `QF_CLIENT_ID`     | ✅       | (secret)                                             |
 | `QF_CLIENT_SECRET` | ✅       | (secret)                                             |
-| `QF_AUTH_URL`      | optional | `https://oauth2.quran.foundation`                    |
-| `QF_API_BASE`      | optional | `https://apis.quran.foundation`                      |
+| `QF_AUTH_URL`      | optional | Pre-live: `https://prelive-oauth2.quran.foundation` &nbsp;·&nbsp; Production: `https://oauth2.quran.foundation` |
+| `QF_API_BASE`      | optional | Pre-live: `https://apis-prelive.quran.foundation` &nbsp;·&nbsp; Production: `https://apis.quran.foundation` |
 | `PORT`             | auto     | Render injects this                                  |
 | `CORS_ORIGIN`      | ✅       | `https://<your-frontend>.vercel.app` (or `*` to start) |
 | `NODE_VERSION`     | preset   | `20`                                                 |
