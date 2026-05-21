@@ -1207,12 +1207,14 @@ app.get('/api/search', checkCredentials, async (req, res) => {
     const s = parseInt(size) || 20;
     const t = translations || '85';
     const token = await getAccessToken();
-    const url = `${QF_API_BASE}/api/v4/search?q=${encodeURIComponent(q)}&size=${s}&page=0&language=${language}&translations=${t}`;
+    const baseUrl = QF_API_BASE.replace(/\/$/, '');
+    const url = `${baseUrl}/content/api/v4/search?q=${encodeURIComponent(q)}&size=${s}&page=0&language=${language}&translations=${t}`;
     console.log(`♦ Search: "${q}"`);
     const resp = await fetch(url, {
       headers: {
         'Accept': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        'x-auth-token': token,
+        'x-client-id': QF_CLIENT_ID,
       },
     });
     if (!resp.ok) throw new Error(`Quran search API returned ${resp.status}`);
