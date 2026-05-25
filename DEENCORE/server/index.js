@@ -516,6 +516,25 @@ const QURAN_CHAPTERS = [
   { id: 114, verse_count: 6, english_name: "An-Nas", arabic_name: "الناس" }
 ];
 
+// Normalize chapter objects so the frontend always gets name_simple + name_arabic
+// regardless of whether data came from QF live API or the hardcoded fallback list.
+const normalizeChapterForClient = (ch) => {
+  const english =
+    ch.english_name ||
+    ch.name_simple ||
+    ch.translated_name?.name ||
+    `Surah ${ch.id}`;
+  const arabic = ch.arabic_name || ch.name_arabic || '';
+  return {
+    id: ch.id,
+    verse_count: ch.verse_count ?? ch.verses_count,
+    english_name: english,
+    arabic_name: arabic,
+    name_simple: english,
+    name_arabic: arabic,
+  };
+};
+
 // Get all chapters (Surahs) - with pagination handling
 app.get('/api/chapters', checkCredentials, async (req, res) => {
   try {
@@ -537,7 +556,7 @@ app.get('/api/chapters', checkCredentials, async (req, res) => {
         // If API gave us all chapters, great! Use them
         if (chapters.length >= 114) {
           console.log(`✓ API provided all 114 chapters`);
-          return res.json({ chapters });
+          return res.json({ chapters: chapters.map(normalizeChapterForClient) });
         }
       }
     } catch (err) {
@@ -559,7 +578,7 @@ app.get('/api/chapters', checkCredentials, async (req, res) => {
     }
 
     console.log(`✓ Returning ${chapters.length} chapters to frontend`);
-    res.json({ chapters });
+    res.json({ chapters: chapters.map(normalizeChapterForClient) });
   } catch (err) {
     console.error('Error in /api/chapters:', err.message);
     res.status(500).json({

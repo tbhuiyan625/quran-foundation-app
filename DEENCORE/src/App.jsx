@@ -2486,7 +2486,7 @@ function Quran({ audioControls, onOpenSearch }) {
         const built = {
           number: selection,
           contextType: viewBy,
-          englishName: viewBy === 'surah' ? (activeMeta?.name_simple || 'Chapter') : (activeMeta?.title || 'Quran Section'),
+          englishName: viewBy === 'surah' ? (activeMeta?.name_simple || `Surah ${activeMeta?.chapter_number || selectedSurah}`) : (activeMeta?.title || 'Quran Section'),
           translated: viewBy === 'surah' ? (activeMeta?.translated || '') : (activeMeta?.subtitle || ''),
           name: viewBy === 'surah'
             ? (activeMeta?.name || 'سورة')
