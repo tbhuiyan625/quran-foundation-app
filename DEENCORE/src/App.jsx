@@ -1670,6 +1670,15 @@ const ARABIC_NAMES = {
 
 const getArabicChapterName = (id) => ARABIC_NAMES[id] || '\u0633\u0648\u0631\u0629';
 
+// Backend returns english_name / arabic_name (hardcoded + QF API shapes differ).
+const normalizeChapterFromApi = (ch) => ({
+  id: ch.id,
+  chapter_number: ch.id ?? ch.chapter_number,
+  name: ch.arabic_name || ch.name_arabic || getArabicChapterName(ch.id),
+  name_simple: ch.english_name || ch.name_simple || ch.translated_name?.name || `Surah ${ch.id}`,
+  translated: ch.translated_name?.name || ch.english_name || '',
+});
+
 // ─── Additional Quran Icons ────────────────────────────────
 
 const IconMoreVert = () => (
@@ -2406,12 +2415,7 @@ function Quran({ audioControls, onOpenSearch }) {
       .then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.json(); })
       .then(data => {
         if (data.chapters) {
-          setSurahs(data.chapters.map(ch => ({
-            id: ch.id, chapter_number: ch.id,
-            name: ch.name_arabic || getArabicChapterName(ch.id),
-            name_simple: ch.name_simple || 'Chapter',
-            translated: ch.translated_name?.name || '',
-          })));
+          setSurahs(data.chapters.map(normalizeChapterFromApi));
         }
       })
       .catch(err => setError(`Failed to load chapters: ${err.message}`))
@@ -4802,8 +4806,8 @@ function AppShell({ tab, setTab }) {
       if (!chapter) return info;
       return {
         number: surahNumber,
-        name: chapter.name_simple || info.name,
-        totalAyahs: chapter.verses_count || null,
+        name: chapter.english_name || chapter.name_simple || info.name,
+        totalAyahs: chapter.verses_count || chapter.verse_count || null,
       };
     } catch {
       return info;
@@ -4880,8 +4884,8 @@ function AppShell({ tab, setTab }) {
         const chaptersData = await chaptersRes.json();
         const chapter = (chaptersData?.chapters || []).find(c => Number(c.id) === surahNumber);
         if (chapter) {
-          baseSurahInfo.name = chapter.name_simple || baseSurahInfo.name;
-          baseSurahInfo.totalAyahs = chapter.verses_count || null;
+          baseSurahInfo.name = chapter.english_name || chapter.name_simple || baseSurahInfo.name;
+          baseSurahInfo.totalAyahs = chapter.verses_count || chapter.verse_count || null;
         }
       }
     } catch {
