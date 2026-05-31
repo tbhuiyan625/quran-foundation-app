@@ -935,6 +935,18 @@ button, a, .home-card, .surah-item, .ayah-card, .theme-option,
   letter-spacing: 0.01em;
 }
 
+.surah-item-unavailable {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.surah-item-unavailable .surah-item-name::after {
+  content: ' · preview';
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
 .surah-item.active .surah-item-arabic {
   color: rgba(0, 0, 0, 0.45);
 }

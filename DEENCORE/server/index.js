@@ -43,6 +43,26 @@ const QF_API_BASE = process.env.QF_API_BASE || 'https://apis-prelive.quran.found
 const QF_ACCESS_TOKEN = process.env.QF_ACCESS_TOKEN;
 const PORT = process.env.PORT || 3001;
 
+// Pre-live API tier only includes full verse data for chapters 1–2.
+const isPreliveTier = (process.env.QF_API_BASE || '').includes('prelive');
+const chapterVersesAvailable = (chapterId) =>
+  !isPreliveTier || (chapterId >= 1 && chapterId <= 2);
+
+const isTierUnavailableError = (err) => {
+  const msg = String(err?.message || '');
+  return /404|Not Found|not available/i.test(msg);
+};
+
+const chapterNotAvailableResponse = (res, chapter) =>
+  res.status(404).json({
+    error: 'Chapter not available',
+    message: isPreliveTier
+      ? `Chapter ${chapter} is not available in the pre-live API tier. Only Surahs 1 (Al-Fatihah) and 2 (Al-Baqarah) have verses.`
+      : `Chapter ${chapter} is not yet available in the current API tier`,
+    status: 'NOT_AVAILABLE',
+    available_chapters: isPreliveTier ? [1, 2] : null,
+  });
+
 // OAuth2 token cache
 let tokenCache = {
   access_token: null,
@@ -532,6 +552,7 @@ const normalizeChapterForClient = (ch) => {
     arabic_name: arabic,
     name_simple: english,
     name_arabic: arabic,
+    verses_available: chapterVersesAvailable(ch.id),
   };
 };
 
@@ -722,6 +743,10 @@ app.get('/api/chapters/:chapterNumber/verses/:translationId', checkCredentials, 
       });
     }
 
+    if (!chapterVersesAvailable(chapter)) {
+      return chapterNotAvailableResponse(res, chapter);
+    }
+
     // Fetch verses (Arabic) and translations in parallel
     console.log(`Fetching chapter ${chapter} + translation ${transId} in parallel...`);
     const [rawVerses, rawTranslations] = await Promise.all([
@@ -730,11 +755,7 @@ app.get('/api/chapters/:chapterNumber/verses/:translationId', checkCredentials, 
     ]);
 
     if (rawVerses.length === 0) {
-      return res.status(404).json({
-        error: 'Chapter not available',
-        message: `Chapter ${chapter} is not yet available in the current DEENCORE API tier`,
-        status: 'NOT_AVAILABLE'
-      });
+      return chapterNotAvailableResponse(res, chapter);
     }
 
     const verses = mergeVersesAndTranslations(rawVerses, rawTranslations, chapter);
@@ -742,6 +763,9 @@ app.get('/api/chapters/:chapterNumber/verses/:translationId', checkCredentials, 
     res.json({ verses });
   } catch (err) {
     console.error('Error fetching verses with translation:', err.message);
+    if (isTierUnavailableError(err)) {
+      return chapterNotAvailableResponse(res, chapter);
+    }
     res.status(500).json({
       error: 'Failed to fetch verses',
       message: err.message,
@@ -768,6 +792,10 @@ app.get('/api/chapters/:chapterNumber/verses', checkCredentials, async (req, res
       });
     }
 
+    if (!chapterVersesAvailable(chapter)) {
+      return chapterNotAvailableResponse(res, chapter);
+    }
+
     // Fetch verses (Arabic) and translations in parallel
     const [rawVerses, rawTranslations] = await Promise.all([
       fetchVerses(chapter),
@@ -775,11 +803,7 @@ app.get('/api/chapters/:chapterNumber/verses', checkCredentials, async (req, res
     ]);
 
     if (rawVerses.length === 0) {
-      return res.status(404).json({
-        error: 'Chapter not available',
-        message: `Chapter ${chapter} is not yet available in the current DEENCORE API tier`,
-        status: 'NOT_AVAILABLE'
-      });
+      return chapterNotAvailableResponse(res, chapter);
     }
 
     const verses = mergeVersesAndTranslations(rawVerses, rawTranslations, chapter);
@@ -787,6 +811,9 @@ app.get('/api/chapters/:chapterNumber/verses', checkCredentials, async (req, res
     res.json({ verses });
   } catch (err) {
     console.error('Error fetching verses:', err.message);
+    if (isTierUnavailableError(err)) {
+      return chapterNotAvailableResponse(res, chapter);
+    }
     res.status(500).json({
       error: 'Failed to fetch verses',
       message: err.message,

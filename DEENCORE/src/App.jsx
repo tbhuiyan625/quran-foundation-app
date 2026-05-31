@@ -1677,7 +1677,11 @@ const normalizeChapterFromApi = (ch) => ({
   name: ch.arabic_name || ch.name_arabic || getArabicChapterName(ch.id),
   name_simple: ch.english_name || ch.name_simple || ch.translated_name?.name || `Surah ${ch.id}`,
   translated: ch.translated_name?.name || ch.english_name || '',
+  verses_available: ch.verses_available !== false,
 });
+
+const PRELIVE_TIER_MESSAGE =
+  'Only Surah 1 (Al-Fatihah) and Surah 2 (Al-Baqarah) have full verse text on the pre-live API. Other surahs are listed but not readable until production credentials are enabled.';
 
 // ─── Additional Quran Icons ────────────────────────────────
 
@@ -2094,7 +2098,8 @@ function Quran({ audioControls, onOpenSearch }) {
   const [selectedSurah, setSelectedSurah] = useState(() => {
     try {
       const saved = localStorage.getItem('lastReadSurah');
-      return saved ? JSON.parse(saved).number || 1 : 1;
+      const num = saved ? JSON.parse(saved).number || 1 : 1;
+      return num <= 2 ? num : 1;
     } catch { return 1; }
   });
   const [selectedJuz, setSelectedJuz] = useState(1);
@@ -2448,6 +2453,17 @@ function Quran({ audioControls, onOpenSearch }) {
     if (viewBy === 'hizb' && !selectedHizb) return;
 
     const selection = viewBy === 'surah' ? selectedSurah : viewBy === 'juz' ? selectedJuz : selectedHizb;
+
+    if (viewBy === 'surah') {
+      const meta = surahs.find(s => s.id === selectedSurah);
+      if (meta && meta.verses_available === false) {
+        setError(PRELIVE_TIER_MESSAGE);
+        setSurah(null);
+        setLoading(false);
+        return;
+      }
+    }
+
     const cacheKey = `${viewBy}:${selection}:${settings.translationId}:${settings.scriptStyle}`;
     if (quranContentCacheRef.current.has(cacheKey)) {
       setSurah(quranContentCacheRef.current.get(cacheKey));
@@ -2464,10 +2480,15 @@ function Quran({ audioControls, onOpenSearch }) {
         : `${API_BASE}/api/hizbs/${selectedHizb}/verses/${settings.translationId}`;
 
     fetch(endpoint)
-      .then(r => {
-        if (r.status === 404 && viewBy === 'surah') throw new Error('This surah is not yet available in the current API tier. Chapters 1-2 are available.');
-        if (!r.ok) throw new Error(`Backend returned ${r.status}`);
-        return r.json();
+      .then(async (r) => {
+        const body = await r.json().catch(() => ({}));
+        if (r.status === 404 && viewBy === 'surah') {
+          throw new Error(body.message || 'This surah is not available. Only Surahs 1 (Al-Fatihah) and 2 (Al-Baqarah) work on the pre-live API.');
+        }
+        if (!r.ok) {
+          throw new Error(body.message || `Backend returned ${r.status}`);
+        }
+        return body;
       })
       .then(data => {
         if (!data.verses) throw new Error('No verses found');
@@ -2681,12 +2702,18 @@ function Quran({ audioControls, onOpenSearch }) {
                   </div>
                 ) : filteredSidebarItems.map(item => (
                   <button key={item.id}
-                    className={`surah-item ${selectedSidebarId === item.id ? 'active' : ''}`}
+                    className={`surah-item ${selectedSidebarId === item.id ? 'active' : ''} ${viewBy === 'surah' && item.verses_available === false ? 'surah-item-unavailable' : ''}`}
                     onClick={() => {
+                      if (viewBy === 'surah' && item.verses_available === false) {
+                        setError(PRELIVE_TIER_MESSAGE);
+                        setSurah(null);
+                        return;
+                      }
                       if (viewBy === 'surah') setSelectedSurah(item.id);
                       if (viewBy === 'juz') setSelectedJuz(item.id);
                       if (viewBy === 'hizb') setSelectedHizb(item.id);
                       setSurahSearch('');
+                      setError(null);
                     }}>
                     <span className="surah-item-number">{viewBy === 'surah' ? item.chapter_number : item.number}</span>
                     <div className="surah-item-text">
